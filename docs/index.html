@@ -129,8 +129,8 @@
                 </div>
             </div>
 
-            <!-- Score Rows -->
-            <div class="form-group">
+            <!-- Score Rows (CANDIDATE / PARTY) -->
+            <div id="score-section" class="form-group">
                 <label>คะแนน</label>
                 <div class="score-header">
                     <span class="col-id">เลขที่</span>
@@ -141,6 +141,31 @@
                 <button id="btn-add-row" class="btn btn-outline btn-sm" type="button">
                     ＋ เพิ่มแถว
                 </button>
+            </div>
+
+            <!-- Spoiled Ballots (CANDIDATE / PARTY) -->
+            <div id="spoiled-section" class="form-group">
+                <label>บัตรเสีย</label>
+                <input type="number" id="spoiled-ballots" inputmode="numeric" placeholder="จำนวนบัตรเสีย" min="0" />
+            </div>
+
+            <!-- Referendum Section -->
+            <div id="referendum-section" class="form-group hidden">
+                <label>ผลประชามติ</label>
+                <div class="referendum-fields">
+                    <div class="referendum-field">
+                        <label class="referendum-label">✅ เห็นชอบ</label>
+                        <input type="number" id="ref-approve" inputmode="numeric" placeholder="คะแนน" min="0" />
+                    </div>
+                    <div class="referendum-field">
+                        <label class="referendum-label">❌ ไม่เห็นชอบ</label>
+                        <input type="number" id="ref-disapprove" inputmode="numeric" placeholder="คะแนน" min="0" />
+                    </div>
+                    <div class="referendum-field">
+                        <label class="referendum-label">⚠️ บัตรเสีย</label>
+                        <input type="number" id="ref-spoiled" inputmode="numeric" placeholder="จำนวน" min="0" />
+                    </div>
+                </div>
             </div>
 
             <!-- Evidence Upload -->
@@ -168,15 +193,9 @@
             </div>
 
             <div class="form-group">
-                <label>📷 อัปโหลดรูปหลักฐาน</label>
+                <label>📷 อัปโหลดรูปหลักฐาน <span class="hint">(ถ้ามี)</span></label>
                 <input type="file" id="evidence-images-b" accept="image/*" multiple class="file-input" />
                 <div id="preview-images-b" class="image-preview-grid"></div>
-            </div>
-
-            <div class="form-group">
-                <label>🎥 อัปโหลดวิดีโอ <span class="hint">(สูงสุด 10 MB ต่อไฟล์)</span></label>
-                <input type="file" id="evidence-videos-b" accept="video/*" multiple class="file-input" />
-                <div id="preview-videos-b" class="video-preview-list"></div>
             </div>
 
             <div id="error-3b" class="error-msg hidden"></div>

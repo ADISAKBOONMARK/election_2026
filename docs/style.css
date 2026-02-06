@@ -423,22 +423,54 @@ textarea {
 }
 
 .score-row .btn-remove {
-    flex: 0 0 36px;
-    height: 36px;
-    border: none;
-    background: var(--danger);
-    color: #fff;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity .2s;
+  flex: 0 0 44px;
+  height: 44px;
+
+  border: none;
+  background: var(--danger);
+  color: #fff;
+
+  border-radius: 10px;
+  font-size: 1.4rem;
+  font-weight: bold;
+
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: opacity .2s, transform .1s;
 }
 
 .score-row .btn-remove:active {
-    opacity: .7;
+  opacity: .7;
+  transform: scale(.95);
+}
+
+/* ── REFERENDUM FIELDS ── */
+.referendum-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.referendum-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.referendum-field .referendum-label {
+    flex: 0 0 120px;
+    font-size: .9rem;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.referendum-field input[type="number"] {
+    flex: 1;
+    padding: 10px;
+    font-size: 1rem;
 }
 
 /* ── FILE INPUT ── */

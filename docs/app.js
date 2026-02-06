@@ -40,6 +40,10 @@ let state = {
     // Step 3a
     ballotType: 'CANDIDATE',
     scoreRows: [{ id: '', score: '' }],
+    spoiledBallots: '',   // บัตรเสีย (CANDIDATE/PARTY)
+    referendumApprove: '',    // ประชามติ: เห็นชอบ
+    referendumDisapprove: '', // ประชามติ: ไม่เห็นชอบ
+    referendumSpoiled: '',    // ประชามติ: บัตรเสีย
     imagesA: [],          // { file, base64, name }
 
     // Step 3b
@@ -312,6 +316,16 @@ function addScoreRow() {
 }
 
 // ═══════════════════════════════════════════════
+// TOGGLE BALLOT SECTIONS
+// ═══════════════════════════════════════════════
+function toggleBallotSections() {
+    const isRef = state.ballotType === 'REFERENDUM';
+    $('#score-section').classList.toggle('hidden', isRef);
+    $('#spoiled-section').classList.toggle('hidden', isRef);
+    $('#referendum-section').classList.toggle('hidden', !isRef);
+}
+
+// ═══════════════════════════════════════════════
 // IMAGE & VIDEO HANDLING
 // ═══════════════════════════════════════════════
 function handleFileInput(input, targetArray, previewContainerId, type = 'image') {
@@ -390,27 +404,42 @@ function updateProgress(step) {
 function validateStep3a() {
     const errors = [];
 
-    // Check score rows
-    const validRows = state.scoreRows.filter((r) => r.id !== '' || r.score !== '');
-    if (validRows.length === 0) {
-        errors.push('กรุณากรอกคะแนนอย่างน้อย 1 แถว');
-    }
-
-    // Check id & score are numbers
-    for (const row of validRows) {
-        if (!row.id || isNaN(Number(row.id))) {
-            errors.push(`เลขที่ "${row.id}" ไม่ถูกต้อง`);
+    if (state.ballotType === 'REFERENDUM') {
+        // Referendum: ต้องกรอกเห็นชอบ + ไม่เห็นชอบ
+        if (state.referendumApprove === '' || isNaN(Number(state.referendumApprove))) {
+            errors.push('กรุณากรอกคะแนน "เห็นชอบ"');
         }
-        if (row.score === '' || isNaN(Number(row.score))) {
-            errors.push(`คะแนนของเลขที่ ${row.id} ไม่ถูกต้อง`);
+        if (state.referendumDisapprove === '' || isNaN(Number(state.referendumDisapprove))) {
+            errors.push('กรุณากรอกคะแนน "ไม่เห็นชอบ"');
         }
-    }
+        if (state.referendumSpoiled !== '' && isNaN(Number(state.referendumSpoiled))) {
+            errors.push('จำนวนบัตรเสียไม่ถูกต้อง');
+        }
+    } else {
+        // CANDIDATE / PARTY: ต้องกรอกคะแนนอย่างน้อย 1 แถว
+        const validRows = state.scoreRows.filter((r) => r.id !== '' || r.score !== '');
+        if (validRows.length === 0) {
+            errors.push('กรุณากรอกคะแนนอย่างน้อย 1 แถว');
+        }
 
-    // Check duplicate ids
-    const ids = validRows.map((r) => r.id);
-    const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
-    if (dupes.length > 0) {
-        errors.push(`เลขที่ซ้ำ: ${[...new Set(dupes)].join(', ')}`);
+        for (const row of validRows) {
+            if (!row.id || isNaN(Number(row.id))) {
+                errors.push(`เลขที่ "${row.id}" ไม่ถูกต้อง`);
+            }
+            if (row.score === '' || isNaN(Number(row.score))) {
+                errors.push(`คะแนนของเลขที่ ${row.id} ไม่ถูกต้อง`);
+            }
+        }
+
+        const ids = validRows.map((r) => r.id);
+        const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+        if (dupes.length > 0) {
+            errors.push(`เลขที่ซ้ำ: ${[...new Set(dupes)].join(', ')}`);
+        }
+
+        if (state.spoiledBallots !== '' && isNaN(Number(state.spoiledBallots))) {
+            errors.push('จำนวนบัตรเสียไม่ถูกต้อง');
+        }
     }
 
     // Check images
@@ -426,10 +455,6 @@ function validateStep3b() {
 
     if (!state.description.trim()) {
         errors.push('กรุณากรอกรายละเอียดเหตุการณ์');
-    }
-
-    if (state.imagesB.length === 0 && state.videosB.length === 0) {
-        errors.push('กรุณาอัปโหลดหลักฐานอย่างน้อย 1 รายการ (รูปหรือวิดีโอ)');
     }
 
     return errors;
@@ -460,17 +485,29 @@ function buildSummary() {
         html += `<div class="summary-section">
       <dl>
         <dt>ประเภทบัตร</dt><dd>${ballotLabels[state.ballotType] || state.ballotType}</dd>
-      </dl>
-      <table>
+      </dl>`;
+
+        if (state.ballotType === 'REFERENDUM') {
+            html += `<table>
+        <tbody>
+          <tr><td>✅ เห็นชอบ</td><td>${state.referendumApprove}</td></tr>
+          <tr><td>❌ ไม่เห็นชอบ</td><td>${state.referendumDisapprove}</td></tr>
+          <tr><td>⚠️ บัตรเสีย</td><td>${state.referendumSpoiled || 0}</td></tr>
+        </tbody>
+      </table>`;
+        } else {
+            html += `<table>
         <thead><tr><th>เลขที่</th><th>คะแนน</th></tr></thead>
         <tbody>
           ${state.scoreRows
-                .filter((r) => r.id !== '')
-                .map((r) => `<tr><td>${r.id}</td><td>${r.score}</td></tr>`)
-                .join('')}
+                    .filter((r) => r.id !== '')
+                    .map((r) => `<tr><td>${r.id}</td><td>${r.score}</td></tr>`)
+                    .join('')}
+          <tr><td>⚠️ บัตรเสีย</td><td>${state.spoiledBallots || 0}</td></tr>
         </tbody>
-      </table>
-    </div>`;
+      </table>`;
+        }
+        html += `</div>`;
 
         html += `<div class="summary-section">
       <dt>รูปหลักฐาน</dt><dd>${state.imagesA.length} รูป</dd>
@@ -481,10 +518,12 @@ function buildSummary() {
       <dd>${escapeHtml(state.description)}</dd>
     </div>`;
 
-        html += `<div class="summary-section">
+        if (state.imagesB.length > 0) {
+            html += `<div class="summary-section">
       <dt>หลักฐาน</dt>
-      <dd>${state.imagesB.length} รูป, ${state.videosB.length} วิดีโอ</dd>
+      <dd>${state.imagesB.length} รูป</dd>
     </div>`;
+        }
     }
 
     html += `<div class="summary-section">
@@ -544,9 +583,18 @@ function buildPayload() {
             unit: state.unit,
             ballotType: state.ballotType,
             round: 1,
-            results: state.scoreRows
-                .filter((r) => r.id !== '')
-                .map((r) => ({ id: Number(r.id), score: Number(r.score) })),
+            results: state.ballotType === 'REFERENDUM'
+                ? [
+                    { id: 'approve', score: Number(state.referendumApprove) },
+                    { id: 'disapprove', score: Number(state.referendumDisapprove) },
+                    { id: 'spoiled', score: Number(state.referendumSpoiled || 0) },
+                ]
+                : [
+                    ...state.scoreRows
+                        .filter((r) => r.id !== '')
+                        .map((r) => ({ id: Number(r.id), score: Number(r.score) })),
+                    ...(state.spoiledBallots ? [{ id: 0, score: Number(state.spoiledBallots) }] : []),
+                ],
             evidences: {
                 images: state.imagesA.map((img) => img.base64),
             },
@@ -564,7 +612,6 @@ function buildPayload() {
             description: state.description,
             evidences: {
                 images: state.imagesB.map((img) => img.base64),
-                videos: state.videosB.map((vid) => vid.base64),
             },
             reporter: {
                 lineUserId: state.lineUserId,
@@ -586,6 +633,10 @@ function saveState() {
             unit: state.unit,
             ballotType: state.ballotType,
             scoreRows: state.scoreRows,
+            spoiledBallots: state.spoiledBallots,
+            referendumApprove: state.referendumApprove,
+            referendumDisapprove: state.referendumDisapprove,
+            referendumSpoiled: state.referendumSpoiled,
             description: state.description,
             currentStep: state.currentStep,
         };
@@ -605,6 +656,10 @@ function restoreState() {
         state.unit = data.unit || '';
         state.ballotType = data.ballotType || 'CANDIDATE';
         state.scoreRows = data.scoreRows || [{ id: '', score: '' }];
+        state.spoiledBallots = data.spoiledBallots || '';
+        state.referendumApprove = data.referendumApprove || '';
+        state.referendumDisapprove = data.referendumDisapprove || '';
+        state.referendumSpoiled = data.referendumSpoiled || '';
         state.description = data.description || '';
 
         // Restore UI
@@ -631,6 +686,13 @@ function restoreState() {
         }
 
         renderScoreRows();
+
+        // Restore spoiled / referendum inputs
+        if (state.spoiledBallots) $('#spoiled-ballots').value = state.spoiledBallots;
+        if (state.referendumApprove) $('#ref-approve').value = state.referendumApprove;
+        if (state.referendumDisapprove) $('#ref-disapprove').value = state.referendumDisapprove;
+        if (state.referendumSpoiled) $('#ref-spoiled').value = state.referendumSpoiled;
+        toggleBallotSections();
 
         // Go to saved step (but at most step 3, don't auto-advance to confirm)
         const targetStep = Math.min(data.currentStep || 1, 3);
@@ -667,6 +729,7 @@ function bindEvents() {
     $('#btn-step2-next').addEventListener('click', () => {
         goStep(3);
         if (state.mode === 'score') {
+            toggleBallotSections();
             renderScoreRows();
         }
     });
@@ -677,8 +740,27 @@ function bindEvents() {
     $$('input[name="ballotType"]').forEach((radio) => {
         radio.addEventListener('change', (e) => {
             state.ballotType = e.target.value;
+            toggleBallotSections();
             saveState();
         });
+    });
+
+    $('#spoiled-ballots').addEventListener('input', (e) => {
+        state.spoiledBallots = e.target.value;
+        saveState();
+    });
+
+    $('#ref-approve').addEventListener('input', (e) => {
+        state.referendumApprove = e.target.value;
+        saveState();
+    });
+    $('#ref-disapprove').addEventListener('input', (e) => {
+        state.referendumDisapprove = e.target.value;
+        saveState();
+    });
+    $('#ref-spoiled').addEventListener('input', (e) => {
+        state.referendumSpoiled = e.target.value;
+        saveState();
     });
 
     $('#evidence-images-a').addEventListener('change', (e) => {
@@ -705,10 +787,6 @@ function bindEvents() {
 
     $('#evidence-images-b').addEventListener('change', (e) => {
         handleFileInput(e.target, state.imagesB, '#preview-images-b', 'image');
-    });
-
-    $('#evidence-videos-b').addEventListener('change', (e) => {
-        handleFileInput(e.target, state.videosB, '#preview-videos-b', 'video');
     });
 
     $('#btn-step3b-next').addEventListener('click', () => {
@@ -769,14 +847,16 @@ window.goStep = goStep;
 window.resetApp = function () {
     state.mode = null;
     state.scoreRows = [{ id: '', score: '' }];
+    state.spoiledBallots = '';
+    state.referendumApprove = '';
+    state.referendumDisapprove = '';
+    state.referendumSpoiled = '';
     state.description = '';
     state.imagesA = [];
     state.imagesB = [];
-    state.videosB = [];
     clearSavedState();
     // Clear file previews
     $('#preview-images-a').innerHTML = '';
     $('#preview-images-b').innerHTML = '';
-    $('#preview-videos-b').innerHTML = '';
     goStep(1);
 };

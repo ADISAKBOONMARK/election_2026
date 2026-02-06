@@ -804,7 +804,10 @@ function bindEvents() {
     // ── Step 4: Confirm & Submit ──
     $('#btn-back-from-4').addEventListener('click', () => {
         goStep(3);
-        if (state.mode === 'score') renderScoreRows();
+        if (state.mode === 'score') {
+            toggleBallotSections();
+            renderScoreRows();
+        }
     });
 
     $('#btn-submit').addEventListener('click', submitReport);

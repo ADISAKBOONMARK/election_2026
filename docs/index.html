@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>รายงานผลเลือกตั้ง 2569</title>
+    <link rel="stylesheet" href="style.css" />
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+
+<body>
+    <!-- ══════════════ LOADING OVERLAY ══════════════ -->
+    <div id="loading-overlay" class="overlay">
+        <div class="spinner"></div>
+        <p>กำลังเตรียมระบบ…</p>
+    </div>
+
+    <!-- ══════════════ TOAST ══════════════ -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- ══════════════ APP CONTAINER ══════════════ -->
+    <div id="app" class="container hidden">
+
+        <!-- ── HEADER ── -->
+        <header class="app-header">
+            <h1>🗳️ รายงานผลเลือกตั้ง</h1>
+            <p class="subtitle">ระบบสำหรับผู้สังเกตการณ์</p>
+            <div id="user-info" class="user-info hidden">
+                <img id="user-avatar" class="avatar" alt="" />
+                <span id="user-name"></span>
+            </div>
+        </header>
+
+        <!-- ── PROGRESS BAR ── -->
+        <div class="progress-bar">
+            <div class="progress-track">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="step-labels">
+                <span class="step-label active" data-step="1">โหมด</span>
+                <span class="step-label" data-step="2">หน่วย</span>
+                <span class="step-label" data-step="3">กรอกข้อมูล</span>
+                <span class="step-label" data-step="4">ยืนยัน</span>
+            </div>
+        </div>
+
+        <!-- ═══════════ STEP 1: เลือกโหมด ═══════════ -->
+        <section id="step-1" class="step active">
+            <h2>เลือกโหมดการรายงาน</h2>
+            <div class="mode-cards">
+                <button class="mode-card mode-score" data-mode="score">
+                    <span class="mode-icon">🔵</span>
+                    <span class="mode-title">รายงานผลคะแนน</span>
+                    <span class="mode-desc">รายงานคะแนนผู้สมัคร / พรรค / ประชามติ</span>
+                </button>
+                <button class="mode-card mode-incident" data-mode="incident">
+                    <span class="mode-icon">🔴</span>
+                    <span class="mode-title">รายงานเหตุต้องสงสัย</span>
+                    <span class="mode-desc">แจ้งพฤติกรรมที่น่าสงสัยของเจ้าหน้าที่</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ═══════════ STEP 2: เลือกหน่วยเลือกตั้ง ═══════════ -->
+        <section id="step-2" class="step hidden">
+            <h2>เลือกหน่วยเลือกตั้ง</h2>
+
+            <div class="form-group">
+                <label for="sel-district">อำเภอ</label>
+                <select id="sel-district">
+                    <option value="">-- เลือกอำเภอ --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="sel-subdistrict">ตำบล</label>
+                <select id="sel-subdistrict" disabled>
+                    <option value="">-- เลือกตำบล --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="sel-unit">หน่วยที่</label>
+                <select id="sel-unit" disabled>
+                    <option value="">-- เลือกหน่วย --</option>
+                </select>
+            </div>
+
+            <!-- Unit Info Card -->
+            <div id="unit-info" class="unit-info-card hidden">
+                <div class="unit-name">
+                    <strong>📍 ชื่อหน่วย:</strong>
+                    <span id="unit-name-text"></span>
+                </div>
+                <a id="unit-map-link" href="#" target="_blank" rel="noopener" class="map-link">
+                    🗺️ ดูแผนที่
+                </a>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="goStep(1)">← ย้อนกลับ</button>
+                <button id="btn-step2-next" class="btn btn-primary" disabled>ถัดไป →</button>
+            </div>
+        </section>
+
+        <!-- ═══════════ STEP 3A: กรอกคะแนน (Mode A) ═══════════ -->
+        <section id="step-3a" class="step hidden">
+            <h2>กรอกผลคะแนน</h2>
+
+            <div class="form-group">
+                <label>ประเภทบัตร</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="ballotType" value="CANDIDATE" checked />
+                        <span class="radio-custom"></span>
+                        ผู้สมัครประจำหน่วย
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="ballotType" value="PARTY" />
+                        <span class="radio-custom"></span>
+                        พรรค
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="ballotType" value="REFERENDUM" />
+                        <span class="radio-custom"></span>
+                        ประชามติ
+                    </label>
+                </div>
+            </div>
+
+            <!-- Score Rows -->
+            <div class="form-group">
+                <label>คะแนน</label>
+                <div class="score-header">
+                    <span class="col-id">เลขที่</span>
+                    <span class="col-score">คะแนน</span>
+                    <span class="col-action"></span>
+                </div>
+                <div id="score-rows"></div>
+                <button id="btn-add-row" class="btn btn-outline btn-sm" type="button">
+                    ＋ เพิ่มแถว
+                </button>
+            </div>
+
+            <!-- Evidence Upload -->
+            <div class="form-group">
+                <label>📷 อัปโหลดรูปหลักฐาน <span class="required">*อย่างน้อย 1 รูป</span></label>
+                <input type="file" id="evidence-images-a" accept="image/*" multiple class="file-input" />
+                <div id="preview-images-a" class="image-preview-grid"></div>
+            </div>
+
+            <div id="error-3a" class="error-msg hidden"></div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="goStep(2)">← ย้อนกลับ</button>
+                <button id="btn-step3a-next" class="btn btn-primary">ตรวจสอบ →</button>
+            </div>
+        </section>
+
+        <!-- ═══════════ STEP 3B: รายงานเหตุต้องสงสัย (Mode B) ═══════════ -->
+        <section id="step-3b" class="step hidden">
+            <h2>🔴 รายงานเหตุต้องสงสัย</h2>
+
+            <div class="form-group">
+                <label for="incident-desc">รายละเอียดเหตุการณ์</label>
+                <textarea id="incident-desc" rows="5" placeholder="อธิบายเหตุการณ์ที่พบ…"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>📷 อัปโหลดรูปหลักฐาน</label>
+                <input type="file" id="evidence-images-b" accept="image/*" multiple class="file-input" />
+                <div id="preview-images-b" class="image-preview-grid"></div>
+            </div>
+
+            <div class="form-group">
+                <label>🎥 อัปโหลดวิดีโอ <span class="hint">(สูงสุด 10 MB ต่อไฟล์)</span></label>
+                <input type="file" id="evidence-videos-b" accept="video/*" multiple class="file-input" />
+                <div id="preview-videos-b" class="video-preview-list"></div>
+            </div>
+
+            <div id="error-3b" class="error-msg hidden"></div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="goStep(2)">← ย้อนกลับ</button>
+                <button id="btn-step3b-next" class="btn btn-primary">ตรวจสอบ →</button>
+            </div>
+        </section>
+
+        <!-- ═══════════ STEP 4: ยืนยัน / Summary ═══════════ -->
+        <section id="step-4" class="step hidden">
+            <h2>✅ ตรวจสอบข้อมูลก่อนส่ง</h2>
+            <div id="summary-content" class="summary-card"></div>
+
+            <div id="error-4" class="error-msg hidden"></div>
+
+            <div class="btn-group">
+                <button id="btn-back-from-4" class="btn btn-secondary">← แก้ไข</button>
+                <button id="btn-submit" class="btn btn-success">📤 ส่งรายงาน</button>
+            </div>
+        </section>
+
+        <!-- ═══════════ STEP 5: ส่งสำเร็จ ═══════════ -->
+        <section id="step-5" class="step hidden">
+            <div class="success-screen">
+                <div class="success-icon">✅</div>
+                <h2>ส่งรายงานเรียบร้อย!</h2>
+                <p>ระบบได้รับข้อมูลของคุณแล้ว</p>
+                <button class="btn btn-primary" onclick="resetApp()">📝 ส่งรายงานใหม่</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ══════════════ SUBMIT OVERLAY ══════════════ -->
+    <div id="submit-overlay" class="overlay hidden">
+        <div class="spinner"></div>
+        <p>กำลังส่งข้อมูล…</p>
+        <p class="sub">กรุณาอย่าปิดหน้าจอ</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

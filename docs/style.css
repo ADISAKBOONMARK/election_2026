@@ -31,6 +31,11 @@ html {
     font-size: 16px;
 }
 
+/* ── UTILITY ── */
+.hidden {
+    display: none !important;
+}
+
 body {
     font-family: var(--font);
     background: var(--bg);
@@ -423,28 +428,28 @@ textarea {
 }
 
 .score-row .btn-remove {
-  flex: 0 0 44px;
-  height: 44px;
+    flex: 0 0 44px;
+    height: 44px;
 
-  border: none;
-  background: var(--danger);
-  color: #fff;
+    border: none;
+    background: var(--danger);
+    color: #fff;
 
-  border-radius: 10px;
-  font-size: 1.4rem;
-  font-weight: bold;
+    border-radius: 10px;
+    font-size: 1.4rem;
+    font-weight: bold;
 
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  transition: opacity .2s, transform .1s;
+    transition: opacity .2s, transform .1s;
 }
 
 .score-row .btn-remove:active {
-  opacity: .7;
-  transform: scale(.95);
+    opacity: .7;
+    transform: scale(.95);
 }
 
 /* ── REFERENDUM FIELDS ── */

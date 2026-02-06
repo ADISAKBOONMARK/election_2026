@@ -582,7 +582,7 @@ function buildPayload() {
             subdistrict: state.subdistrict,
             unit: state.unit,
             ballotType: state.ballotType,
-            round: 1,
+            round: Date.now(),
             results: state.ballotType === 'REFERENDUM'
                 ? [
                     { id: 'approve', score: Number(state.referendumApprove) },

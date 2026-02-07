@@ -15,7 +15,7 @@ const CONFIG = {
     // Google Apps Script Web App URL
     // TODO: ใส่ URL ของ GAS Web App จริง
     // GAS_URL: 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec',
-    GAS_URL: 'https://script.google.com/macros/s/AKfycbwXfoRJc-XHed1xwROWMD_xedP5fSxP2KeVOCYK9KeJthdqzMYJhs3_9Qj6KFY4bVHw/exec',
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbztmVHcdZG31z8gGtbRyUvWXMrytQi0lQGq2d1hNJ6-U39nM-d1M-TmpHndAaUIYE76/exec',
 
     // Video size limit (bytes) – 10 MB
     VIDEO_MAX_SIZE: 10 * 1024 * 1024,

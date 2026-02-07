@@ -221,7 +221,7 @@ function onSubdistrictChange() {
         .sort((a, b) => Number(a['หน่วยที่']) - Number(b['หน่วยที่']));
 
     units.forEach((u) => {
-        selUnit.innerHTML += `<option value="${u['หน่วยที่']}">${u['ชื่อหน่วย']} (หน่วยที่ ${u['หน่วยที่']})</option>`;
+        selUnit.innerHTML += `<option value="${u['หน่วยที่']}">(หน่วยที่ ${u['หน่วยที่']}) ${u['ชื่อหน่วย']}</option>`;
     });
     selUnit.disabled = false;
 }

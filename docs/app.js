@@ -63,13 +63,17 @@ const $$ = (sel) => document.querySelectorAll(sel);
 // ─── INIT ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        console.log('🚀 [init] starting...');
         await initLiff();
+        console.log('✅ [init] LIFF done, userId:', state.lineUserId);
         await loadMasterData();
+        console.log('✅ [init] masterData loaded:', state.masterData.length, 'rows');
         bindEvents();
         restoreState();
         hideLoading();
+        console.log('✅ [init] app ready');
     } catch (err) {
-        console.error(err);
+        console.error('❌ [init] error:', err);
         showToast('เกิดข้อผิดพลาด: ' + err.message);
         hideLoading();
     }
@@ -567,6 +571,16 @@ async function submitReport() {
     try {
         const payload = buildPayload();
 
+        // ── Debug: log payload (ไม่รวม base64 images) ──
+        const debugPayload = JSON.parse(JSON.stringify(payload));
+        if (debugPayload.evidences?.images) {
+            debugPayload.evidences.images = debugPayload.evidences.images.map(
+                (img, i) => `[image_${i + 1}: ${Math.round(img.length * 0.75 / 1024)} KB]`
+            );
+        }
+        console.log('📤 [submitReport] payload:', JSON.stringify(debugPayload, null, 2));
+        console.log('📤 [submitReport] GAS_URL:', CONFIG.GAS_URL);
+
         const res = await fetch(CONFIG.GAS_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
@@ -574,17 +588,33 @@ async function submitReport() {
             body: JSON.stringify(payload),
         });
 
-        const data = await res.json();
+        console.log('📥 [submitReport] HTTP status:', res.status, res.statusText);
+
+        const text = await res.text();
+        console.log('📥 [submitReport] raw response:', text);
+
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (parseErr) {
+            console.error('❌ [submitReport] JSON parse error:', parseErr, 'raw:', text);
+            showError('error-4', 'เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ');
+            return;
+        }
+
+        console.log('📥 [submitReport] parsed response:', data);
 
         if (data.ok) {
+            console.log('✅ [submitReport] success!', data);
             clearSavedState();
             goStep(5);
         } else {
+            console.error('❌ [submitReport] server error:', data.error);
             showError('error-4', data.error || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์');
         }
     } catch (err) {
-        console.error(err);
-        showError('error-4', 'ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่');
+        console.error('❌ [submitReport] fetch error:', err);
+        showError('error-4', 'ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่ (' + err.message + ')');
     } finally {
         hideSubmitOverlay();
     }

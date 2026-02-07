@@ -39,6 +39,7 @@ let state = {
 
     // Step 3a
     ballotType: 'CANDIDATE',
+    voterTurnout: '',     // จำนวนผู้มาใช้สิทธิ์
     scoreRows: [{ id: '', score: '' }],
     spoiledBallots: '',   // บัตรเสีย (CANDIDATE/PARTY)
     referendumApprove: '',    // ประชามติ: เห็นชอบ
@@ -405,6 +406,11 @@ function updateProgress(step) {
 function validateStep3a() {
     const errors = [];
 
+    // Voter turnout validation
+    if (state.voterTurnout === '' || isNaN(Number(state.voterTurnout))) {
+        errors.push('กรุณากรอกจำนวนผู้มาใช้สิทธิ์');
+    }
+
     if (state.ballotType === 'REFERENDUM') {
         // Referendum: ต้องกรอกเห็นชอบ + ไม่เห็นชอบ
         if (state.referendumApprove === '' || isNaN(Number(state.referendumApprove))) {
@@ -486,6 +492,7 @@ function buildSummary() {
         html += `<div class="summary-section">
       <dl>
         <dt>ประเภทบัตร</dt><dd>${ballotLabels[state.ballotType] || state.ballotType}</dd>
+        <dt>จำนวนผู้มาใช้สิทธิ์</dt><dd>${state.voterTurnout} คน</dd>
       </dl>`;
 
         if (state.ballotType === 'REFERENDUM') {
@@ -583,6 +590,7 @@ function buildPayload() {
             subdistrict: state.subdistrict,
             unit: state.unit,
             ballotType: state.ballotType,
+            voterTurnout: Number(state.voterTurnout) || 0,
             round: Date.now(),
             results: state.ballotType === 'REFERENDUM'
                 ? [
@@ -633,6 +641,7 @@ function saveState() {
             subdistrict: state.subdistrict,
             unit: state.unit,
             ballotType: state.ballotType,
+            voterTurnout: state.voterTurnout,
             scoreRows: state.scoreRows,
             spoiledBallots: state.spoiledBallots,
             referendumApprove: state.referendumApprove,
@@ -656,6 +665,7 @@ function restoreState() {
         state.subdistrict = data.subdistrict || '';
         state.unit = data.unit || '';
         state.ballotType = data.ballotType || 'CANDIDATE';
+        state.voterTurnout = data.voterTurnout || '';
         state.scoreRows = data.scoreRows || [{ id: '', score: '' }];
         state.spoiledBallots = data.spoiledBallots || '';
         state.referendumApprove = data.referendumApprove || '';
@@ -688,7 +698,8 @@ function restoreState() {
 
         renderScoreRows();
 
-        // Restore spoiled / referendum inputs
+        // Restore voter turnout / spoiled / referendum inputs
+        if (state.voterTurnout) $('#voter-turnout').value = state.voterTurnout;
         if (state.spoiledBallots) $('#spoiled-ballots').value = state.spoiledBallots;
         if (state.referendumApprove) $('#ref-approve').value = state.referendumApprove;
         if (state.referendumDisapprove) $('#ref-disapprove').value = state.referendumDisapprove;
@@ -744,6 +755,11 @@ function bindEvents() {
             toggleBallotSections();
             saveState();
         });
+    });
+
+    $('#voter-turnout').addEventListener('input', (e) => {
+        state.voterTurnout = e.target.value;
+        saveState();
     });
 
     $('#spoiled-ballots').addEventListener('input', (e) => {
@@ -851,6 +867,7 @@ window.goStep = goStep;
 window.resetApp = function () {
     state.mode = null;
     state.scoreRows = [{ id: '', score: '' }];
+    state.voterTurnout = '';
     state.spoiledBallots = '';
     state.referendumApprove = '';
     state.referendumDisapprove = '';

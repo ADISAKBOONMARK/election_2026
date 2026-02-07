@@ -180,7 +180,7 @@ function onDistrictChange() {
     const selUnit = $('#sel-unit');
 
     selSub.innerHTML = '<option value="">-- เลือกตำบล --</option>';
-    selUnit.innerHTML = '<option value="">-- เลือกหน่วย --</option>';
+    selUnit.innerHTML = '<option value="">-- เลือกชื่อหน่วย --</option>';
     selUnit.disabled = true;
     $('#unit-info').classList.add('hidden');
     $('#btn-step2-next').disabled = true;
@@ -207,7 +207,7 @@ function onSubdistrictChange() {
     state.unit = '';
 
     const selUnit = $('#sel-unit');
-    selUnit.innerHTML = '<option value="">-- เลือกหน่วย --</option>';
+    selUnit.innerHTML = '<option value="">-- เลือกชื่อหน่วย --</option>';
     $('#unit-info').classList.add('hidden');
     $('#btn-step2-next').disabled = true;
 
@@ -221,7 +221,7 @@ function onSubdistrictChange() {
         .sort((a, b) => Number(a['หน่วยที่']) - Number(b['หน่วยที่']));
 
     units.forEach((u) => {
-        selUnit.innerHTML += `<option value="${u['หน่วยที่']}">${u['หน่วยที่']}</option>`;
+        selUnit.innerHTML += `<option value="${u['หน่วยที่']}">${u['ชื่อหน่วย']} (หน่วยที่ ${u['หน่วยที่']})</option>`;
     });
     selUnit.disabled = false;
 }
@@ -244,6 +244,7 @@ function onUnitChange() {
     state.unitName = row ? row['ชื่อหน่วย'] : '';
     state.unitMapUrl = row ? row['ที่ตั้ง'] : '';
 
+    $('#unit-number-text').textContent = state.unit;
     $('#unit-name-text').textContent = state.unitName;
 
     const mapLink = $('#unit-map-link');

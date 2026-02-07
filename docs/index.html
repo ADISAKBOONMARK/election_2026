@@ -10,7 +10,8 @@
     <meta property="og:title" content="🗳️ รายงานผลเลือกตั้ง 2569" />
     <meta property="og:description" content="ระบบรายงานผลเลือกตั้งสำหรับผู้สังเกตการณ์ — รายงานคะแนนและเหตุต้องสงสัย" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://election69.peoplesparty.or.th/images/logos/logo-text-desktop-black.png" />
+    <meta property="og:image"
+        content="https://election69.peoplesparty.or.th/images/logos/logo-text-desktop-black.png" />
     <meta property="og:url" content="https://liff.line.me/2009070108-A8wQ9BQ7" />
     <meta property="og:locale" content="th_TH" />
 
@@ -90,16 +91,20 @@
             </div>
 
             <div class="form-group">
-                <label for="sel-unit">หน่วยที่</label>
+                <label for="sel-unit">ชื่อหน่วย</label>
                 <select id="sel-unit" disabled>
-                    <option value="">-- เลือกหน่วย --</option>
+                    <option value="">-- เลือกชื่อหน่วย --</option>
                 </select>
             </div>
 
             <!-- Unit Info Card -->
             <div id="unit-info" class="unit-info-card hidden">
-                <div class="unit-name">
-                    <strong>📍 ชื่อหน่วย:</strong>
+                <div class="unit-detail">
+                    <strong>📍 หน่วยที่:</strong>
+                    <span id="unit-number-text"></span>
+                </div>
+                <div class="unit-detail">
+                    <strong>🏠 ชื่อหน่วย:</strong>
                     <span id="unit-name-text"></span>
                 </div>
                 <a id="unit-map-link" href="#" target="_blank" rel="noopener" class="map-link">

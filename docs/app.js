@@ -9,12 +9,10 @@ const CONFIG = {
     LIFF_ID: '2009070108-A8wQ9BQ7',
 
     // Google Sheet master data (public CSV)
-    // MASTER_CSV_URL: 'https://docs.google.com/spreadsheets/d/1_tk0BUorCmZZcv20L7Sbpkg08tr9ljoNH37lP90wV5s/export?format=csv&gid=0',
-    MASTER_CSV_URL: 'https://docs.google.com/spreadsheets/d/1_tk0BUorCmZZcv20L7Sbpkg08tr9ljoNH37lP90wV5s/export?format=csv&gid=0',
+    MASTER_CSV_URL: 'https://docs.google.com/spreadsheets/d/1MFzNN-K6SHWhH8FypVWgLMNQ1M6G-w093J4LZ_QF1_0/export?format=csv&gid=0',
 
     // Google Apps Script Web App URL
     // TODO: ใส่ URL ของ GAS Web App จริง
-    // GAS_URL: 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec',
     GAS_URL: 'https://script.google.com/macros/s/AKfycbztmVHcdZG31z8gGtbRyUvWXMrytQi0lQGq2d1hNJ6-U39nM-d1M-TmpHndAaUIYE76/exec',
 
     // Video size limit (bytes) – 10 MB
@@ -344,12 +342,24 @@ function handleFileInput(input, targetArray, previewContainerId, type = 'image')
         const reader = new FileReader();
         reader.onload = (e) => {
             const base64 = e.target.result.split(',')[1];
-            targetArray.push({ name: file.name, base64, type: file.type });
+            const item = { name: file.name, base64, type: file.type };
+            targetArray.push(item);
+            const idx = targetArray.length - 1;
 
             if (type === 'image') {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                previewContainer.appendChild(img);
+                const wrapper = document.createElement('div');
+                wrapper.className = 'image-preview-item';
+                wrapper.innerHTML = `
+                    <img src="${e.target.result}" alt="${file.name}" />
+                    <button type="button" class="btn-remove-img" data-idx="${idx}">✕</button>
+                `;
+                wrapper.querySelector('.btn-remove-img').addEventListener('click', () => {
+                    const i = targetArray.indexOf(item);
+                    if (i > -1) targetArray.splice(i, 1);
+                    wrapper.remove();
+                    saveState();
+                });
+                previewContainer.appendChild(wrapper);
             } else {
                 const div = document.createElement('div');
                 div.className = 'video-item';
